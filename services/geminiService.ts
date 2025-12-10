@@ -1,13 +1,32 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Product } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Lazy initialization to avoid crash if API_KEY is missing during module load
+let ai: GoogleGenAI | null = null;
+
+const getAIClient = () => {
+  if (!ai) {
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) {
+      console.error("API Key is missing. Please check your .env file.");
+      return null;
+    }
+    ai = new GoogleGenAI({ apiKey });
+  }
+  return ai;
+};
 
 export const searchProductsWithAI = async (query: string): Promise<Product[]> => {
   try {
+    const client = getAIClient();
+    if (!client) {
+      // Return mock data or empty array if no API key to prevent UI breakage
+      return [];
+    }
+
     const modelId = "gemini-2.5-flash";
     
-    const response = await ai.models.generateContent({
+    const response = await client.models.generateContent({
       model: modelId,
       contents: `Generate a list of 4 to 8 e-commerce products based on this user search query: "${query}". 
       The products should be realistic.
