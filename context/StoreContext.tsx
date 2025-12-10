@@ -1,15 +1,31 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { Product, CartItem, Order, PageView } from '../types';
-import { useAuth } from './AuthContext';
-import { db } from '../services/db';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
+import { Product, CartItem, Order, PageView } from "../types";
+import { useAuth } from "./AuthContext";
+// [변경] apiService 함수들 import
+import {
+  fetchProductsFromServer,
+  fetchCart,
+  addToCartAPI,
+  updateCartItemAPI,
+  removeFromCartAPI,
+  clearCartAPI,
+  fetchOrdersAPI,
+  placeOrderAPI,
+} from "../services/apiService";
 
 interface StoreContextType {
   cart: CartItem[];
   orders: Order[];
-  addToCart: (product: Product) => void;
-  removeFromCart: (productId: string) => void;
-  updateQuantity: (productId: string, delta: number) => void;
-  clearCart: () => void;
+  addToCart: (product: Product) => Promise<void>; // 비동기로 변경됨
+  removeFromCart: (productId: string) => Promise<void>;
+  updateQuantity: (productId: string, delta: number) => Promise<void>;
+  clearCart: () => Promise<void>;
   placeOrder: () => void;
   currentPage: PageView;
   setCurrentPage: (page: PageView) => void;
@@ -20,106 +36,103 @@ interface StoreContextType {
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
-export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const StoreProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const { user } = useAuth();
-  
+
   const [cart, setCart] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [currentPage, setCurrentPage] = useState<PageView>('home');
+  const [currentPage, setCurrentPage] = useState<PageView>("home");
   const [products, setProductsState] = useState<Product[]>([]);
 
-  // Load initial products from DB
+  // 초기 상품 로딩
   useEffect(() => {
-    const dbProducts = db.getProducts();
-    if (dbProducts.length > 0) {
-        setProductsState(dbProducts);
-    }
+    fetchProductsFromServer().then(setProductsState);
   }, []);
 
-  // Sync Cart and Orders when User changes
   useEffect(() => {
     if (user) {
-      setCart(db.getCart(user.email));
-      setOrders(db.getOrders(user.email));
+      // 장바구니와 주문 내역을 병렬로 가져옴
+      Promise.all([fetchCart(user.email), fetchOrdersAPI(user.email)]).then(
+        ([serverCart, serverOrders]) => {
+          setCart(serverCart);
+          setOrders(serverOrders);
+        }
+      );
     } else {
       setCart([]);
       setOrders([]);
     }
   }, [user]);
 
-  // Helper to update state and DB
-  const saveCartToDb = (newCart: CartItem[]) => {
-    setCart(newCart);
+  // 장바구니 목록 새로고침 헬퍼 함수
+  const refreshCart = async () => {
     if (user) {
-      db.saveCart(user.email, newCart);
+      const updatedCart = await fetchCart(user.email);
+      setCart(updatedCart);
     }
   };
 
-  const addToCart = (product: Product) => {
-    const newCart = [...cart];
-    const existingIndex = newCart.findIndex((item) => item.id === product.id);
+  const addToCart = async (product: Product) => {
+    if (!user) return;
 
-    if (existingIndex >= 0) {
-      newCart[existingIndex] = { 
-        ...newCart[existingIndex], 
-        quantity: newCart[existingIndex].quantity + 1 
-      };
-    } else {
-      newCart.push({ ...product, quantity: 1 });
-    }
-    
-    saveCartToDb(newCart);
+    // 1. 서버에 추가 요청
+    await addToCartAPI(user.email, product.id);
+    // 2. 장바구니 상태 최신화
+    await refreshCart();
   };
 
-  const removeFromCart = (productId: string) => {
-    const newCart = cart.filter((item) => item.id !== productId);
-    saveCartToDb(newCart);
+  const removeFromCart = async (productId: string) => {
+    if (!user) return;
+    await removeFromCartAPI(user.email, productId);
+    await refreshCart();
   };
 
-  const updateQuantity = (productId: string, delta: number) => {
-    const newCart = cart.map((item) => {
-      if (item.id === productId) {
-        const newQuantity = Math.max(1, item.quantity + delta);
-        return { ...item, quantity: newQuantity };
-      }
-      return item;
-    });
-    saveCartToDb(newCart);
+  const updateQuantity = async (productId: string, delta: number) => {
+    if (!user) return;
+
+    const item = cart.find((i) => i.id === productId);
+    if (!item) return;
+
+    const newQuantity = item.quantity + delta;
+    // 수량 변경 요청
+    await updateCartItemAPI(user.email, productId, newQuantity);
+    await refreshCart();
   };
 
-  const clearCart = () => {
-    saveCartToDb([]);
+  const clearCart = async () => {
+    if (!user) return;
+    await clearCartAPI(user.email);
+    setCart([]);
   };
 
-  const placeOrder = () => {
+  const placeOrder = async () => {
     if (cart.length === 0 || !user) return;
-    
-    const newOrder: Order = {
-      id: Date.now().toString(),
-      date: new Date().toISOString(),
-      items: [...cart],
-      total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
-      status: 'processing'
-    };
-    
-    // Update Orders State
-    const newOrders = [newOrder, ...orders];
-    setOrders(newOrders);
-    
-    // Save Order to DB
-    db.addOrder(user.email, newOrder);
-    
-    // Clear Cart
-    clearCart();
-    setCurrentPage('orders');
+
+    // 1. 서버에 주문 요청
+    const success = await placeOrderAPI(user.email);
+
+    if (success) {
+      // 2. 주문 성공 시 로컬 상태 업데이트
+      // 서버에서 최신 주문 목록과 빈 장바구니 상태를 다시 받아옵니다.
+      const newOrders = await fetchOrdersAPI(user.email);
+      setOrders(newOrders);
+
+      setCart([]); // 로컬 장바구니 비우기
+      setCurrentPage("orders"); // 주문 내역 페이지로 이동
+    } else {
+      alert("주문 처리에 실패했습니다.");
+    }
   };
 
   const setProducts = (newProducts: Product[]) => {
-      setProductsState(newProducts);
+    setProductsState(newProducts);
   };
 
-  const resetProducts = () => {
-      setProductsState(db.getProducts());
+  const resetProducts = async () => {
+    const defaultProducts = await fetchProductsFromServer();
+    setProductsState(defaultProducts);
   };
 
   return (
@@ -136,7 +149,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         setCurrentPage,
         products,
         setProducts,
-        resetProducts
+        resetProducts,
       }}
     >
       {children}
@@ -147,7 +160,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 export const useStore = () => {
   const context = useContext(StoreContext);
   if (!context) {
-    throw new Error('useStore must be used within a StoreProvider');
+    throw new Error("useStore must be used within a StoreProvider");
   }
   return context;
 };
