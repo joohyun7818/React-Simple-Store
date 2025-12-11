@@ -128,12 +128,12 @@ export const fetchOrdersAPI = async (email: string): Promise<Order[]> => {
 };
 
 // [추가] 주문 생성하기 (Checkout)
-export const placeOrderAPI = async (email: string): Promise<boolean> => {
+export const placeOrderAPI = async (email: string, country: string): Promise<boolean> => {
   try {
     const response = await fetch(`${API_BASE_URL}/orders`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, country }),
     });
     
     if (!response.ok) throw new Error('주문 처리 실패');
