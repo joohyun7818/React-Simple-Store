@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, ReactNode, useCallback } from "react";
 import { UIConfig } from "../types";
 
 // Default configuration (v1)
@@ -21,13 +21,13 @@ const UIConfigContext = createContext<UIConfigContextType | undefined>(undefined
 export const UIConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [uiConfig, setUIConfigState] = useState<UIConfig>(defaultUIConfig);
 
-  const setUIConfig = (config: UIConfig) => {
+  const setUIConfig = useCallback((config: UIConfig) => {
     setUIConfigState(config);
-  };
+  }, []);
 
-  const resetUIConfig = () => {
+  const resetUIConfig = useCallback(() => {
     setUIConfigState(defaultUIConfig);
-  };
+  }, []);
 
   return (
     <UIConfigContext.Provider value={{ uiConfig, setUIConfig, resetUIConfig }}>
