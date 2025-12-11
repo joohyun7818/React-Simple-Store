@@ -1,8 +1,8 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { Product } from "../types";
 
 // Lazy initialization to avoid crash if API_KEY is missing during module load
-let ai: GoogleGenAI | null = null;
+let ai: GoogleGenerativeAI | null = null;
 
 const getAIClient = () => {
   if (!ai) {
@@ -11,7 +11,7 @@ const getAIClient = () => {
       console.error("API Key is missing. Please check your .env file.");
       return null;
     }
-    ai = new GoogleGenAI({ apiKey });
+    ai = new GoogleGenerativeAI(apiKey);
   }
   return ai;
 };
@@ -24,38 +24,25 @@ export const searchProductsWithAI = async (query: string): Promise<Product[]> =>
       return [];
     }
 
-    const modelId = "gemini-2.5-flash";
+    const model = client.getGenerativeModel({
+      model: "gemini-pro",
+      generationConfig: {
+        responseMimeType: "application/json",
+      },
+    });
     
-    const response = await client.models.generateContent({
-      model: modelId,
-      contents: `Generate a list of 4 to 8 e-commerce products based on this user search query: "${query}". 
+    const prompt = `Generate a list of 4 to 8 e-commerce products based on this user search query: "${query}". 
       The products should be realistic.
-      Return the response in JSON format.
+      Return the response in JSON format as an array of objects.
       The currency should be implied as KRW (South Korean Won), so prices should be appropriate (e.g., 10000, 50000, etc.).
       Images should be placeholder URLs like "https://picsum.photos/400/400?random=1".
       Descriptions should be in Korean.
-      Names should be in Korean.`,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.ARRAY,
-          items: {
-            type: Type.OBJECT,
-            properties: {
-              id: { type: Type.STRING },
-              name: { type: Type.STRING },
-              price: { type: Type.NUMBER },
-              description: { type: Type.STRING },
-              category: { type: Type.STRING },
-              imageUrl: { type: Type.STRING },
-            },
-            required: ["id", "name", "price", "description", "category", "imageUrl"],
-          },
-        },
-      },
-    });
+      Names should be in Korean.
+      
+      Each product should have: id (string), name (string), price (number), description (string), category (string), imageUrl (string)`;
 
-    const jsonText = response.text;
+    const response = await model.generateContent(prompt);
+    const jsonText = response.response.text();
     if (!jsonText) return [];
     
     const products: Product[] = JSON.parse(jsonText);

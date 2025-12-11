@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import { AuthProvider } from './context/AuthContext';
 import { StoreProvider, useStore } from './context/StoreContext';
 import { useAuth } from './context/AuthContext';
+import { UIConfigProvider } from './context/UIConfigContext';
 
 // Router Component to switch views based on state
 const AppContent: React.FC = () => {
@@ -42,11 +43,13 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <StoreProvider>
-        <AppContent />
-      </StoreProvider>
-    </AuthProvider>
+    <UIConfigProvider>
+      <AuthProvider>
+        <StoreProvider>
+          <AppContent />
+        </StoreProvider>
+      </AuthProvider>
+    </UIConfigProvider>
   );
 };
 

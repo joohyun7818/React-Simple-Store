@@ -19,9 +19,20 @@ export interface Order {
   status: 'processing' | 'shipped' | 'delivered';
 }
 
+export interface UIConfig {
+  theme: string;
+  primaryColor: string;
+  showDiscount: boolean;
+  featuredCategories: string[];
+  headerMessage: string;
+}
+
 export interface User {
   email: string;
   name: string;
+  country?: string;
+  variant?: string;
+  uiConfig?: UIConfig;
 }
 
 export type PageView = 'home' | 'cart' | 'orders' | 'login';
