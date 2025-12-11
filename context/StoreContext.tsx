@@ -111,7 +111,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({
     if (cart.length === 0 || !user) return;
 
     // 1. 서버에 주문 요청
-    const success = await placeOrderAPI(user.email, user.country);
+    const success = await placeOrderAPI(user.email);
 
     if (success) {
       // 2. 주문 성공 시 로컬 상태 업데이트
