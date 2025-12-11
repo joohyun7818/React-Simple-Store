@@ -3,8 +3,7 @@ import { Search, Plus, Loader2, Tag } from "lucide-react";
 import { useStore } from "../context/StoreContext";
 import { useAuth } from "../context/AuthContext";
 import { useUIConfig } from "../context/UIConfigContext";
-// import { searchProductsWithAI } from '../services/geminiService'; // 기존 AI 서비스 제거
-import { fetchProductsFromServer } from "../services/apiService"; // 신규 API 서비스 추가
+import { fetchProductsFromServer } from "../services/apiService";
 
 const ProductList: React.FC = () => {
   const { products, addToCart, setProducts, setCurrentPage } = useStore();
@@ -21,7 +20,6 @@ const ProductList: React.FC = () => {
 
   const loadProducts = async (query?: string) => {
     setIsSearching(true);
-    // Gemini 대신 서버 API 호출
     const newProducts = await fetchProductsFromServer(query);
     setProducts(newProducts);
     setIsSearching(false);
@@ -29,7 +27,6 @@ const ProductList: React.FC = () => {
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    // [변경점 2] 검색어를 이용해 서버 재조회
     await loadProducts(searchQuery);
   };
 

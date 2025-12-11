@@ -34,7 +34,6 @@ const AppContent: React.FC = () => {
       <footer className="bg-white border-t border-gray-200 mt-20 py-8">
         <div className="container mx-auto px-4 text-center text-gray-500 text-sm">
             <p>&copy; 2024 AI Smart Store. All rights reserved.</p>
-            <p className="mt-2">Powered by Google Gemini</p>
         </div>
       </footer>
     </div>
