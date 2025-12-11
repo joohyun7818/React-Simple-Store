@@ -2,12 +2,19 @@ import React from 'react';
 import { ShoppingCart, Package, LogOut, User as UserIcon, Store } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useStore } from '../context/StoreContext';
+import { useUIConfig } from '../context/UIConfigContext';
 
 const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
   const { cart, setCurrentPage, currentPage, resetProducts } = useStore();
+  const { uiConfig } = useUIConfig();
 
   const cartItemCount = cart.reduce((acc, item) => acc + item.quantity, 0);
+  
+  // Dynamic styling based on primaryColor
+  const navbarStyle = {
+    backgroundColor: uiConfig.primaryColor
+  };
 
   const navClass = (page: string) => 
     `flex items-center space-x-1 cursor-pointer hover:text-indigo-200 transition-colors ${currentPage === page ? 'text-white font-bold' : 'text-indigo-100'}`;
@@ -18,14 +25,14 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="bg-indigo-600 p-4 shadow-lg sticky top-0 z-50">
+    <nav className="p-4 shadow-lg sticky top-0 z-50" style={navbarStyle}>
       <div className="container mx-auto flex justify-between items-center">
         <div 
             className="flex items-center space-x-2 text-white text-xl font-bold cursor-pointer"
             onClick={handleHomeClick}
         >
           <Store className="w-8 h-8" />
-          <span>AI Smart Store</span>
+          <span>{uiConfig.headerMessage}</span>
         </div>
 
         <div className="flex items-center space-x-6">
