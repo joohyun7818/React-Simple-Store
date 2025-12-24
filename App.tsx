@@ -9,6 +9,8 @@ import { StoreProvider, useStore } from './context/StoreContext';
 import { useAuth } from './context/AuthContext';
 import { UIConfigProvider } from './context/UIConfigContext';
 
+const gtmId = "GTM-MSN4G6C3";
+
 // Router Component to switch views based on state
 const AppContent: React.FC = () => {
   const { currentPage, setCurrentPage } = useStore();
