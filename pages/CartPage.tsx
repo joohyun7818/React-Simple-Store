@@ -1,9 +1,28 @@
-import React from 'react';
-import { Trash2, Plus, Minus, CreditCard, ArrowLeft } from 'lucide-react';
-import { useStore } from '../context/StoreContext';
+import React, { useEffect } from "react";
+import { Trash2, Plus, Minus, CreditCard, ArrowLeft } from "lucide-react";
+import { useStore } from "../context/StoreContext";
 
 const CartPage: React.FC = () => {
-  const { cart, removeFromCart, updateQuantity, placeOrder, setCurrentPage } = useStore();
+  const { cart, removeFromCart, updateQuantity, placeOrder, setCurrentPage } =
+    useStore();
+
+  useEffect(() => {
+    const dataLayer = window.customDataLayer ?? window.dataLayer;
+    dataLayer?.push({
+      event: "view_cart",
+      ecommerce: {
+        currency: "KRW",
+        value: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+        items: cart.map((item) => ({
+          item_id: item.id,
+          item_name: item.name,
+          item_category: item.category,
+          price: item.price,
+          quantity: item.quantity,
+        })),
+      },
+    });
+  }, [cart]);
 
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
@@ -11,12 +30,14 @@ const CartPage: React.FC = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-gray-500">
         <div className="bg-gray-100 p-6 rounded-full mb-4">
-            <CreditCard className="w-12 h-12 text-gray-400" />
+          <CreditCard className="w-12 h-12 text-gray-400" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">장바구니가 비어있습니다</h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">
+          장바구니가 비어있습니다
+        </h2>
         <p className="mb-6">원하는 상품을 담아보세요.</p>
         <button
-          onClick={() => setCurrentPage('home')}
+          onClick={() => setCurrentPage("home")}
           className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
         >
           쇼핑 계속하기
@@ -27,8 +48,8 @@ const CartPage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <button 
-        onClick={() => setCurrentPage('home')}
+      <button
+        onClick={() => setCurrentPage("home")}
         className="flex items-center text-gray-600 hover:text-indigo-600 mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
@@ -40,7 +61,10 @@ const CartPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-4">
           {cart.map((item) => (
-            <div key={item.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
+            <div
+              key={item.id}
+              className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4"
+            >
               <img
                 src={item.imageUrl}
                 alt={item.name}
@@ -53,7 +77,7 @@ const CartPage: React.FC = () => {
                   {item.price.toLocaleString()}원
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-3">
                 <div className="flex items-center border rounded-lg bg-gray-50">
                   <button
@@ -62,7 +86,9 @@ const CartPage: React.FC = () => {
                   >
                     <Minus className="w-3 h-3" />
                   </button>
-                  <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
+                  <span className="w-8 text-center text-sm font-medium">
+                    {item.quantity}
+                  </span>
                   <button
                     onClick={() => updateQuantity(item.id, 1)}
                     className="p-2 hover:bg-gray-200 rounded-r-lg transition-colors"
@@ -84,7 +110,7 @@ const CartPage: React.FC = () => {
         <div className="lg:col-span-1">
           <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 sticky top-24">
             <h3 className="text-lg font-bold text-gray-900 mb-4">결제 정보</h3>
-            
+
             <div className="space-y-2 mb-4 text-sm text-gray-600">
               <div className="flex justify-between">
                 <span>총 상품금액</span>
@@ -95,11 +121,13 @@ const CartPage: React.FC = () => {
                 <span>무료</span>
               </div>
             </div>
-            
+
             <div className="border-t border-gray-200 pt-4 mb-6">
               <div className="flex justify-between items-end">
                 <span className="font-bold text-gray-900">총 결제금액</span>
-                <span className="text-2xl font-bold text-indigo-600">{total.toLocaleString()}원</span>
+                <span className="text-2xl font-bold text-indigo-600">
+                  {total.toLocaleString()}원
+                </span>
               </div>
             </div>
 

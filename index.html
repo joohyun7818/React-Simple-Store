@@ -4,31 +4,58 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI Smart Store</title>
+    <!-- Google Tag Manager -->
+    <script>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != "dataLayer" ? "&l=" + l : "";
+        j.async = true;
+        j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, "script", "customDataLayer", "GTM-MSN4G6C3");
+    </script>
+    <!-- End Google Tag Manager -->
     <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
     <!-- Load sql.js WASM loader -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
     <style>
       body {
-        font-family: 'Noto Sans KR', sans-serif;
+        font-family: "Noto Sans KR", sans-serif;
       }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "vite": "https://aistudiocdn.com/vite@^7.2.7",
-    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.2",
-    "react/": "https://aistudiocdn.com/react@^19.2.1/",
-    "react": "https://aistudiocdn.com/react@^19.2.1",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.32.0",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/"
-  }
-}
-</script>
-</head>
+    <script type="importmap">
+      {
+        "imports": {
+          "vite": "https://aistudiocdn.com/vite@^7.2.7",
+          "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.2",
+          "react/": "https://aistudiocdn.com/react@^19.2.1/",
+          "react": "https://aistudiocdn.com/react@^19.2.1",
+          "@google/genai": "https://aistudiocdn.com/@google/genai@^1.32.0",
+          "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0",
+          "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/"
+        }
+      }
+    </script>
+  </head>
   <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript>
+      <iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-MSN4G6C3"
+        height="0"
+        width="0"
+        style="display: none; visibility: hidden"
+      ></iframe>
+    </noscript>
+    <!-- End Google Tag Manager (noscript) -->
     <div id="root"></div>
     <!-- Entry point for Vite -->
     <script type="module" src="/index.tsx"></script>

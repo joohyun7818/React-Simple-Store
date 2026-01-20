@@ -1,6 +1,8 @@
 import { Product, User, CartItem, Order } from "../types";
 
-const API_BASE_URL = "http://localhost:3000/api";
+// 기본은 같은 도메인의 /api를 사용 (서버와 함께 띄울 때 유리)
+// 필요하면 VITE_API_BASE_URL="https://api.example.com/api" 처럼 오버라이드 가능
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api";
 
 // 상품 목록 조회 호출
 export const fetchProductsFromServer = async (

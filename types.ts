@@ -16,7 +16,7 @@ export interface Order {
   date: string;
   items: CartItem[];
   total: number;
-  status: 'processing' | 'shipped' | 'delivered';
+  status: "processing" | "shipped" | "delivered";
 }
 
 export interface UIConfig {
@@ -35,10 +35,12 @@ export interface User {
   uiConfig?: UIConfig;
 }
 
-export type PageView = 'home' | 'cart' | 'orders' | 'login';
+export type PageView = "home" | "cart" | "orders" | "login";
 
 declare global {
   interface Window {
     initSqlJs: (config?: any) => Promise<any>;
+    customDataLayer?: Array<Record<string, any>>;
+    dataLayer?: Array<Record<string, any>>;
   }
 }

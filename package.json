@@ -4,9 +4,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "sudo vite --host --port 80 --strictPort",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "sudo vite preview --host --port 80 --strictPort"
   },
   "dependencies": {
     "lucide-react": "^0.344.0",
